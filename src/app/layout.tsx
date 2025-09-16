@@ -4,7 +4,7 @@ import type { Metadata } from 'next'
 import { Inter, IBM_Plex_Serif } from 'next/font/google'
 import './globals.css'
 import './customs.css'
-import { twMerge } from 'tailwind-merge'
+import { cn } from '@/lib/utils'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const ibmPlexSerif = IBM_Plex_Serif({
@@ -28,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en'>
-      <body className={twMerge(inter.variable, ibmPlexSerif.variable)}>{children}</body>
+      <body className={cn(inter.variable, ibmPlexSerif.variable)}>{children}</body>
     </html>
   )
 }
