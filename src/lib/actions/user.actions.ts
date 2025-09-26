@@ -21,9 +21,14 @@ export const getUserInfo = async ({ userId }: getUserInfoProps) => {
     const { database } = await createAdminClient();
 
     const user = await database.listDocuments(
-      DATABASE_ID!,
-      USER_COLLECTION_ID!,
-      [Query.equal('userId', [userId])]
+      {
+        databaseId: DATABASE_ID!,
+        collectionId: USER_COLLECTION_ID!,
+        queries: [Query.equal('$id', [userId])]
+      }
+      // DATABASE_ID!,
+      // USER_COLLECTION_ID!,
+      // [Query.equal('userId', [userId])]
     );
 
     return parseStringify(user.documents[0]);
@@ -35,7 +40,7 @@ export const getUserInfo = async ({ userId }: getUserInfoProps) => {
 export const signIn = async ({ email, password }: signInProps) => {
   try {
     const { account } = await createAdminClient();
-    const session = await account.createEmailPasswordSession(email, password);
+    const session = await account.createEmailPasswordSession({ email, password });
     const cookieStore = await cookies();
 
     cookieStore.set("appwrite-session", session.secret, {
@@ -62,10 +67,12 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
     const { account, database } = await createAdminClient();
 
     newUserAccount = await account.create(
-      ID.unique(),
-      email,
-      password,
-      `${firstName} ${lastName}`
+      {
+        userId: ID.unique(),
+        email,
+        password,
+        name: `${firstName} ${lastName}`
+      }
     );
 
     if (!newUserAccount) throw new Error('Error creating user');
@@ -80,18 +87,20 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
     const dwollaCustomerId = extractCustomerIdFromUrl(dwollaCustomerUrl);
 
     const newUser = await database.createDocument(
-      DATABASE_ID!,
-      USER_COLLECTION_ID!,
-      ID.unique(),
       {
-        ...userData,
-        userId: newUserAccount.$id,
-        dwollaCustomerId,
-        dwollaCustomerUrl
+        databaseId: DATABASE_ID!,
+        collectionId: USER_COLLECTION_ID!,
+        documentId: ID.unique(),
+        data: {
+          ...userData,
+          userId: newUserAccount.$id,
+          dwollaCustomerId,
+          dwollaCustomerUrl
+        }
       }
     );
 
-    const session = await account.createEmailPasswordSession(email, password);
+    const session = await account.createEmailPasswordSession({ email, password });
     const cookieStore = await cookies();
     cookieStore.set("appwrite-session", session.secret, {
       path: "/",
@@ -126,7 +135,7 @@ export const logoutAccount = async () => {
     const cookieStore = await cookies();
     cookieStore.delete('appwrite-session');
 
-    await account.deleteSession('current');
+    await account.deleteSession({ sessionId: 'current' });
   } catch (error) {
     return null;
   }
