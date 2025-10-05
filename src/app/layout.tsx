@@ -3,7 +3,6 @@ export const dynamic = 'force-dynamic'
 import type { Metadata } from 'next'
 import { Inter, IBM_Plex_Serif } from 'next/font/google'
 import './globals.css'
-import './customs.css'
 import { cn } from '@/lib/utils'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
